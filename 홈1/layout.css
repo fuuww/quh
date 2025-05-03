@@ -1,0 +1,86 @@
+/* layout.css - 레이아웃 구조 관련 스타일 */
+
+/* 컨테이너 및 전체 레이아웃 */
+body {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+/* 헤더 레이아웃 */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--gray);
+    background-color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: var(--transition);
+}
+
+header.scrolled {
+    box-shadow: var(--shadow);
+    padding: 10px 0;
+}
+
+/* 메인 콘텐츠 레이아웃 */
+.main-content {
+    display: flex;
+    margin-top: var(--space-xl);
+    gap: var(--space-xl);
+}
+
+/* 사이드바 레이아웃 */
+.sidebar {
+    width: 220px;
+    flex-shrink: 0;
+}
+
+/* 콘텐츠 영역 레이아웃 */
+.content-area {
+    flex-grow: 1;
+}
+
+/* 제품 그리드 레이아웃 */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xxl);
+}
+
+/* 고정 요소 (최근 본 상품, 스크롤 탑 버튼 등) */
+.fixed-element {
+    position: fixed;
+    z-index: 900;
+}
+
+/* 반응형 레이아웃 */
+@media (max-width: 1200px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트픽 - 주문조회</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* 라이트 모드 (기본) 변수 */
+            --primary: #e93170;
+            --primary-dark: #d42665;
+            --primary-light: #ffedf3;
+            --secondary: #f8f9fa;
+            --dark: #343a40;
+            --white: #ffffff;
+            --gray: #e0e0e0;
+            --gray-light: #f8f9fa;
+            --text: #212529;
+            --body-bg: #ffffff;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --success: #28a745;
+            --success-light: #ebf9ee;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --border-radius: 10px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+
+            /* 장바구니 페이지 기존 변수 */
+            --text-light: #767676;
+            --radius: 8px;
+        }
+
+        /* 다크 모드 변수 */
+        [data-theme="dark"] {
+            --primary: #ff5d8f;
+            --primary-dark: #e93170;
+            --primary-light: #3a2329;
+            --secondary: #343a40;
+            --dark: #f8f9fa;
+            --white: #343a40;
+            --gray: #495057;
+            --gray-light: #343a40;
+            --text: #f8f9fa;
+            --body-bg: #212529;
+            --card-bg: #343a40;
+            --header-bg: #282c31;
+            --border-color: #495057;
+            --success: #5cb85c;
+            --success-light: #283a2e;
+            --warning: #f0ad4e;
+            --danger: #d9534f;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header styles - Sticky (메인 홈페이지 스타일) */
+        header {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--header-bg);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header.scrolled {
+            box-shadow: var(--shadow);
+            padding: 10px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-box {
+            background-color: var(--gray);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            margin-right: 10px;
+            font-size: 14px;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        /* Search bar with animation */
+        .search-container {
+            flex-grow: 1;
+            max-width: 600px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid var(--gray);
+            border-radius: 30px;
+            font-size: 16px;
+            transition: var(--transition);
+            outline: none;
+            background-color: var(--body-bg);
+            color: var(--text);
+        }
+
+        .search-bar:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(233, 49, 112, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dark);
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* Navigation buttons with hover effects */
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-button {
+            background-color: var(--secondary);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text);
+        }
+
+        .nav-button:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+        }
+
+        .nav-button i {
+            font-size: 16px;
+        }
+
+        /* 다크 모드 토글 버튼 */
+        .theme-toggle {
+            background-color: var(--secondary);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: 10px;
+            color: var(--text);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--gray);
+            transform: rotate(30deg);
+        }
+
+        /* My Page Sidebar */
+        .mypage-container {
+            display: flex;
+            margin-top: 30px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .profile-grade {
+            font-size: 13px;
+            color: var(--primary);
+        }
+
+        .sidebar-menu {
+            list-style-type: none;
+        }
+
+        .menu-item {
+            margin-bottom: 8px;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--text);
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+
+        .menu-item a:hover {
+            background-color: var(--secondary);
+        }
+
+        .menu-item.active a {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* 기간 선택 필터 */
+        .period-filter {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .period-btn {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background-color: var(--secondary);
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .period-btn:hover {
+            background-color: var(--gray);
+        }
+
+        .period-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .order-list {
+            margin-bottom: 30px;
+        }
+
+        .order-item {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .order-header {
+            background-color: var(--secondary);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-date {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .order-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+
+        .status-shipping {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .status-preparing {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .status-canceled {
+            background-color: var(--gray);
+            color: var(--text-light);
+        }
+
+        .order-content {
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .order-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background-color: var(--secondary);
+            overflow: hidden;
+        }
+
+        .order-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .order-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .product-count {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .order-price {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .order-button {
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-detail {
+            background-color: var(--secondary);
+            color: var(--text);
+        }
+
+        .btn-detail:hover {
+            background-color: var(--gray);
+        }
+
+        .btn-track {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-track:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-cancel {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reorder {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-reorder:hover {
+            opacity: 0.9;
+        }
+
+        .btn-review {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-review:hover {
+            opacity: 0.9;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 30px;
+        }
+
+        .page-btn {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background-color: var(--secondary);
+            color: var(--text);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .page-btn:hover {
+            background-color: var(--gray);
+        }
+
+        .page-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .empty-orders {
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .empty-message {
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        .shop-now-btn {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .shop-now-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--dark);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .mypage-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .order-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-image {
+                width: 100%;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>배송 조회가 시작되었습니다.</span>
+    </div>
+
+    <!-- Header section - Sticky (메인 홈페이지 스타일) -->
+    <header id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-box">스마<br>트픽</div>
+                    <span>스마트픽</span>
+                </div>
+                <div class="search-container">
+                    <form id="searchForm" action="search_result.html" method="get">
+                        <input type="text" class="search-bar" name="query" placeholder="찾으시는 상품을 검색해보세요">
+                        <button type="submit" class="search-icon">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="nav-buttons">
+                    <button class="nav-button" onclick="window.location.href='log-in.html'">
+                        <i class="fas fa-user"></i>
+                        로그인
+                    </button>
+                    <button class="nav-button" onclick="window.location.href='join1.html'">
+                        <i class="fas fa-user-plus"></i>
+                        회원가입
+                    </button>
+                    <button class="nav-button" onclick="window.location.href='cart.html'">
+                        <i class="fas fa-shopping-cart"></i>
+                        장바구니
+                    </button>
+                    <button class="theme-toggle" id="themeToggle" aria-label="테마 변경">
+                        <i class="fas fa-sun"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- My Page Container -->
+        <div class="mypage-container">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-profile">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div class="profile-name">홍길동님</div>
+                        <div class="profile-grade">일반회원</div>
+                    </div>
+                </div>
+
+                <ul class="sidebar-menu">
+                    <li class="menu-item">
+                        <a href="mypage.html">
+                            <i class="fas fa-home"></i>
+                            마이페이지 홈
+                        </a>
+                    </li>
+                    <li class="menu-item active">
+                        <a href="mypage-orders.html">
+                            <i class="fas fa-shopping-bag"></i>
+                            주문 조회
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="mypage-wishlist.html">
+                            <i class="fas fa-heart"></i>
+                            찜한 상품
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="mypage-review.html">
+                            <i class="fas fa-star"></i>
+                            상품평 관리
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="mypage-coupon.html">
+                            <i class="fas fa-ticket-alt"></i>
+                            쿠폰함
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="mypage-point.html">
+                            <i class="fas fa-coins"></i>
+                            포인트
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="mypage-address.html">
+                            <i class="fas fa-map-marker-alt"></i>
+                            배송지 관리
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="mypage-info.html">
+                            <i class="fas fa-user-cog"></i>
+                            회원정보 수정
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="content-header">
+                    <h2 class="content-title">주문 조회</h2>
+                </div>
+
+                <!-- 기간 선택 필터 -->
+                <div class="period-filter">
+                    <button class="period-btn active">전체</button>
+                    <button class="period-btn">오늘</button>
+                    <button class="period-btn">1주일</button>
+                    <button class="period-btn">1개월</button>
+                    <button class="period-btn">3개월</button>
+                    <button class="period-btn">6개월</button>
+                </div>
+
+                <!-- 주문 목록 -->
+                <div class="order-list">
+                    <!-- 주문 아이템 1 -->
+                    <div class="order-item">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-date">2025.03.13</span>
+                                <span class="order-number">주문번호: SP-20250313-12345</span>
+                            </div>
+                            <span class="order-status status-completed">배송완료</span>
+                        </div>
+                        <div class="order-content">
+                            <div class="order-image">
+                                <img src="/api/placeholder/80/80" alt="Product">
+                            </div>
+                            <div class="order-info">
+                                <div class="product-name">스마트픽 울트라북 X15</div>
+                                <div class="product-count">외 2건</div>
+                                <div class="order-price">1,152,000원</div>
+                            </div>
+                            <div class="order-actions">
+                                <button class="order-button btn-detail"
+                                    onclick="window.location.href='order-detail.html?order=SP-20250313-12345'">상세보기</button>
+                                <button class="order-button btn-track"
+                                    onclick="showToast('배송 조회가 시작되었습니다.')">배송조회</button>
+                                <button class="order-button btn-review">리뷰쓰기</button>
+                                <button class="order-button btn-reorder">재구매</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 주문 아이템 2 -->
+                    <div class="order-item">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-date">2025.03.05</span>
+                                <span class="order-number">주문번호: SP-20250305-54321</span>
+                            </div>
+                            <span class="order-status status-shipping">배송중</span>
+                        </div>
+                        <div class="order-content">
+                            <div class="order-image">
+                                <img src="/api/placeholder/80/80" alt="Product">
+                            </div>
+                            <div class="order-info">
+                                <div class="product-name">스마트픽 블루투스 헤드폰</div>
+                                <div class="product-count">외 1건</div>
+                                <div class="order-price">89,000원</div>
+                            </div>
+                            <div class="order-actions">
+                                <button class="order-button btn-detail"
+                                    onclick="window.location.href='order-detail.html?order=SP-20250305-54321'">상세보기</button>
+                                <button class="order-button btn-track"
+                                    onclick="showToast('배송 조회가 시작되었습니다.')">배송조회</button>
+                                <button class="order-button btn-cancel">주문취소</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 주문 아이템 3 -->
+                    <div class="order-item">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-date">2025.02.20</span>
+                                <span class="order-number">주문번호: SP-20250220-98765</span>
+                            </div>
+                            <span class="order-status status-preparing">상품준비중</span>
+                        </div>
+                        <div class="order-content">
+                            <div class="order-image">
+                                <img src="/api/placeholder/80/80" alt="Product">
+                            </div>
+                            <div class="order-info">
+                                <div class="product-name">스마트픽 게이밍 마우스</div>
+                                <div class="product-count">총 1건</div>
+                                <div class="order-price">45,000원</div>
+                            </div>
+                            <div class="order-actions">
+                                <button class="order-button btn-detail"
+                                    onclick="window.location.href='order-detail.html?order=SP-20250220-98765'">상세보기</button>
+                                <button class="order-button btn-cancel">주문취소</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 주문 아이템 4 -->
+                    <div class="order-item">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-date">2025.01.15</span>
+                                <span class="order-number">주문번호: SP-20250115-67890</span>
+                            </div>
+                            <span class="order-status status-canceled">취소완료</span>
+                        </div>
+                        <div class="order-content">
+                            <div class="order-image">
+                                <img src="/api/placeholder/80/80" alt="Product">
+                            </div>
+                            <div class="order-info">
+                                <div class="product-name">스마트픽 무선 충전기</div>
+                                <div class="product-count">총 1건</div>
+                                <div class="order-price">35,000원</div>
+                            </div>
+                            <div class="order-actions">
+                                <button class="order-button btn-detail"
+                                    onclick="window.location.href='order-detail.html?order=SP-20250115-67890'">상세보기</button>
+                                <button class="order-button btn-reorder">재구매</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 페이지네이션 -->
+                <div class="pagination">
+                    <button class="page-btn"><i class="fas fa-angle-double-left"></i></button>
+                    <button class="page-btn"><i class="fas fa-angle-left"></i></button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn"><i class="fas fa-angle-right"></i></button>
+                    <button class="page-btn"><i class="fas fa-angle-double-right"></i></button>
+                </div>
+
+                <!-- 주문 없을 때 표시 (현재는 숨김 처리) -->
+                <div class="empty-orders" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="empty-message">주문 내역이 없습니다.</div>
+                    <button class="shop-now-btn" onclick="window.location.href='index.html'">
+                        <i class="fas fa-shopping-cart"></i> 쇼핑하러 가기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function initTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('i');
+            const savedTheme = localStorage.getItem('theme') || 'light';
+
+            // 저장된 테마 적용
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            // 테마 토글 이벤트
+            themeToggle.addEventListener('click', function () {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+
+                // 아이콘 변경
+                if (newTheme === 'dark') {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            });
+        }
+
+        // 스크롤 이벤트 처리
+        function handleScroll() {
+            const header = document.getElementById('header');
+
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.querySelector('.toast');
+            const toastMessage = toast.querySelector('span');
+            toastMessage.textContent = message || '알림 메시지';
+
+            toast.classList.add('show');
+
+            setTimeout(function () {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 기간 필터 설정
+        function setupPeriodFilter() {
+            const periodBtns = document.querySelectorAll('.period-btn');
+
+            periodBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // 모든 버튼에서 active 클래스 제거
+                    periodBtns.forEach(b => b.classList.remove('active'));
+
+                    // 클릭한 버튼에 active 클래스 추가
+                    this.classList.add('active');
+
+                    // 여기에 실제 필터링 로직 추가 (데모에서는 생략)
+                    // 실제 구현에서는 선택된 기간에 따라 주문 목록을 필터링하고 다시 렌더링하는 로직이 필요
+                    const period = this.textContent;
+                    showToast(`${period} 기간의 주문내역을 조회합니다.`);
+                });
+            });
+        }
+
+        // 주문 관련 액션 이벤트 설정
+        function setupOrderActions() {
+            // 배송조회 버튼
+            document.querySelectorAll('.btn-track').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    showToast('배송 조회가 시작되었습니다.');
+                    // 실제 구현에서는 여기에 배송 추적 API 호출 또는 배송 추적 페이지로 이동 로직 추가
+                });
+            });
+
+            // 주문취소 버튼
+            document.querySelectorAll('.btn-cancel').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (confirm('정말로 이 주문을 취소하시겠습니까?')) {
+                        // 실제 구현에서는 여기에 주문 취소 API 호출 로직 추가
+                        showToast('주문이 취소되었습니다.');
+                    }
+                });
+            });
+
+            // 리뷰쓰기 버튼
+            document.querySelectorAll('.btn-review').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // 실제 구현에서는 리뷰 작성 페이지로 이동
+                    window.location.href = 'write-review.html';
+                });
+            });
+
+            // 재구매 버튼
+            document.querySelectorAll('.btn-reorder').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // 실제 구현에서는 상품을 장바구니에 다시 추가하는 로직
+                    showToast('상품이 장바구니에 추가되었습니다.');
+                });
+            });
+        }
+
+        // 페이지네이션 설정
+        function setupPagination() {
+            const pageBtns = document.querySelectorAll('.page-btn');
+
+            pageBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // 이미 active 상태인 버튼이거나 화살표 버튼이면 무시
+                    if (this.classList.contains('active') || this.querySelector('i')) {
+                        return;
+                    }
+
+                    // 모든 숫자 버튼에서 active 클래스 제거
+                    pageBtns.forEach(b => {
+                        if (!b.querySelector('i')) { // 숫자 버튼만 처리
+                            b.classList.remove('active');
+                        }
+                    });
+
+                    // 클릭한 버튼에 active 클래스 추가
+                    this.classList.add('active');
+
+                    // 여기에 실제 페이지 전환 로직 추가 (데모에서는 생략)
+                    // 실제 구현에서는 선택된 페이지에 해당하는 주문 목록을 가져와 렌더링하는 로직이 필요
+                    const page = this.textContent;
+                    showToast(`${page}페이지로 이동합니다.`);
+                });
+            });
+        }
+
+        // 검색 폼 제출 처리
+        function setupSearchForm() {
+            const searchForm = document.getElementById('searchForm');
+            if (searchForm) {
+                searchForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const searchInput = this.querySelector('.search-bar');
+                    const query = searchInput.value.trim();
+
+                    if (query) {
+                        // 검색 결과 페이지로 이동
+                        window.location.href = `search_result.html?query=${encodeURIComponent(query)}`;
+                    } else {
+                        showToast('검색어를 입력해주세요.');
+                    }
+                });
+            }
+        }
+
+        // 메인 로고 클릭 이벤트
+        function setupLogoClick() {
+            const logo = document.querySelector('.logo');
+            if (logo) {
+                logo.addEventListener('click', function () {
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+        // 초기화 함수
+    document.addEventListener('DOMContentLoaded', function() {
+        // 테마 관련 초기화
+        initTheme();
+        
+        // 스크롤 이벤트 리스너
+        window.addEventListener('scroll', handleScroll);
+        
+        // 기간 필터 설정
+        setupPeriodFilter();
+        
+        // 주문 액션 이벤트 설정
+        setupOrderActions();
+        
+        // 페이지네이션 설정
+        setupPagination();
+        
+        // 검색 폼 설정
+        setupSearchForm();
+        
+        // 로고 클릭 이벤트 설정
+        setupLogoClick();
+        
+        // URL 파라미터 처리 (예: 특정 주문 번호로 페이지 접근 시)
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderNumber = urlParams.get('order');
+        
+        if (orderNumber) {
+            // 특정 주문 번호가 URL에 있으면 해당 주문 강조 표시
+            const orderItems = document.querySelectorAll('.order-item');
+            orderItems.forEach(item => {
+                const orderNumElement = item.querySelector('.order-number');
+                if (orderNumElement && orderNumElement.textContent.includes(orderNumber)) {
+                    item.style.borderColor = 'var(--primary)';
+                    item.style.boxShadow = '0 0 10px rgba(233, 49, 112, 0.2)';
+                    
+                    // 해당 주문으로 스크롤
+                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트픽 - 검색 결과</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --primary-light: #ffdedf;
+            --primary-dark: #e63e3e;
+            --secondary: #f8f9fa;
+            --dark: #333333;
+            --light: #ffffff;
+            --gray: #e0e0e0;
+            --gray-light: #f5f5f5;
+            --gray-dark: #888888;
+            --text: #333333;
+            --text-light: #767676;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+            --radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background-color: var(--gray-light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--light);
+            padding: 15px 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        .logo {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 20px;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 20px;
+            border: 1px solid var(--gray);
+            border-radius: 30px;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+        }
+        
+        .search-keyword {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .search-keyword.show {
+            display: inline-block;
+        }
+        
+        .search-input.with-keyword {
+            padding-left: 100px;
+        }
+        
+        .search-clear {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray-dark);
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        .search-clear:hover {
+            opacity: 1;
+        }
+        
+        .search-button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray-dark);
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-button {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .nav-button i {
+            font-size: 16px;
+            color: var(--primary);
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            padding: 15px 0;
+            font-size: 13px;
+            color: var(--gray-dark);
+        }
+        
+        .breadcrumb a {
+            color: var(--gray-dark);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--primary);
+        }
+        
+        .breadcrumb-separator {
+            margin: 0 8px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        /* Filter Sidebar */
+        .filter-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+        }
+        
+        .filter-section {
+            background-color: var(--light);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .filter-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .filter-reset {
+            font-size: 12px;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .filter-reset:hover {
+            color: var(--primary);
+        }
+        
+        .filter-body {
+            padding: 15px 20px;
+        }
+        
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        
+        .filter-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .filter-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .filter-toggle {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .filter-options {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .filter-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .filter-count {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-left: auto;
+        }
+        
+        .price-slider {
+            margin: 10px 0 20px;
+        }
+        
+        .price-range {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .price-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-size: 13px;
+            width: 100%;
+        }
+        
+        .price-separator {
+            color: var(--text-light);
+        }
+        
+        .rating-stars {
+            color: #f8cc46;
+            font-size: 16px;
+            margin-right: 5px;
+        }
+        
+        /* Applied Filters */
+        .applied-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-tag {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .filter-tag:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .filter-tag i {
+            font-size: 12px;
+        }
+        
+        /* Product Results */
+        .product-results {
+            flex: 1;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .results-info {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .results-count {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .results-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .view-button {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--gray-light);
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .view-button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .product-list .product-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .product-card {
+            background-color: var(--light);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .product-image {
+            height: 180px;
+            background-color: var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--primary);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .product-discount {
+            background-color: #ff9f43;
+        }
+        
+        .product-new {
+            background-color: #55c57a;
+        }
+        
+        .product-stock {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .product-quick-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            padding: 30px 10px 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: var(--transition);
+        }
+        
+        .product-card:hover .product-quick-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .quick-action-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            color: var(--text);
+        }
+        
+        .quick-action-button:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .product-info {
+            padding: 15px;
+        }
+        
+        .product-category {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        
+        .product-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 46px;
+        }
+        
+        .product-specs {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 42px;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .rating {
+            display: flex;
+            color: #f8cc46;
+            font-size: 14px;
+        }
+        
+        .rating-count {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-left: 5px;
+        }
+        
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .current-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        
+        .original-price {
+            font-size: 14px;
+            color: var(--text-light);
+            text-decoration: line-through;
+        }
+        
+        .discount-percent {
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-button {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .cart-button {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .cart-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .wishlist-button {
+            background-color: var(--secondary);
+            color: var(--text);
+            border: 1px solid var(--gray);
+        }
+        
+        .wishlist-button:hover {
+            background-color: var(--gray-light);
+        }
+        
+        /* List View */
+        .product-list .product-card {
+            display: grid;
+            grid-template-columns: 200px 1fr auto;
+            height: 200px;
+        }
+        
+        .product-list .product-image {
+            height: 100%;
+        }
+        
+        .product-list .product-quick-actions {
+            opacity: 1;
+            transform: translateY(0);
+            background: none;
+            top: 50px;
+            bottom: auto;
+            left: auto;
+            right: 10px;
+            width: 32px;
+            flex-direction: column;
+            padding: 0;
+        }
+        
+        .product-list .product-info {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .product-list .product-name,
+        .product-list .product-specs {
+            -webkit-line-clamp: 1;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        .product-list .product-actions {
+            margin-top: auto;
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .page-button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px;
+            border-radius: 18px;
+            border: 1px solid var(--gray);
+            background-color: var(--light);
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .page-button:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .page-button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .page-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Quick View Modal */
+        .quick-view-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-view-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            width: 900px;
+            max-width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            animation: modalIn 0.3s forwards;
+        }
+        
+        @keyframes modalIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        
+        .modal-close:hover {
+            color: var(--primary);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--gray);
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--dark);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .toast i {
+            font-size: 18px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .filter-sidebar {
+                width: 100%;
+            }
+            
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .product-list .product-card {
+                grid-template-columns: 150px 1fr;
+                height: auto;
+            }
+            
+            .product-list .product-quick-actions {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .search-bar {
+                margin: 0 10px;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .product-list .product-card {
+                grid-template-columns: 120px 1fr;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .brand span {
+                display: none;
+            }
+            
+            .product-list .product-card {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-list .product-image {
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">장바구니에 추가되었습니다.</span>
+    </div>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="brand">
+                    <div class="logo">스마<br>트픽</div>
+                    <span>스마트픽</span>
+                </a>
+                
+                <div class="search-bar">
+                    <span class="search-keyword show">노트북</span>
+                    <input type="text" class="search-input with-keyword" placeholder="검색어를 입력하세요" value="노트북">
+                    <button class="search-clear" id="searchClear">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="nav-button">
+                        <i class="fas fa-user"></i>
+                        마이페이지
+                    </button>
+                    <button class="nav-button">
+                        <i class="fas fa-shopping-cart"></i>
+                        장바구니
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="#">홈</a>
+            <span class="breadcrumb-separator">></span>
+            <a href="#">검색</a>
+            <span class="breadcrumb-separator">></span>
+            <span>노트북</span>
+        </div>
+        
+        <!-- Applied Filters -->
+        <div class="applied-filters">
+            <div class="filter-tag">
+                가격: 100만원-150만원
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="filter-tag">
+                브랜드: 삼성
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="filter-tag">
+                평점: 4점 이상
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <div class="filter-section">
+                    <div class="filter-header">
+                        <h3 class="filter-title">필터</h3>
+                        <button class="filter-reset">초기화</button>
+                    </div>
+                    <div class="filter-body">
+                        <!-- Price Range Filter -->
+                        <div class="filter-group">
+                            <div class="filter-group-title">
+                                <span>가격대</span>
+                                <span class="filter-toggle"><i class="fas fa-chevron-up"></i></span>
+                            </div>
+                            <div class="filter-options">
+                                <input type="range" class="price-slider" min="0" max="3000000" step="100000" value="1500000">
+                                <div class="price-range">
+                                    <input type="text" class="price-input" placeholder="최소" value="1,000,000">
+                                    <span class="price-separator">~</span>
+                                    <input type="text" class="price-input" placeholder="최대" value="1,500,000">
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price1" class="filter-checkbox">
+                                    <label for="price1" class="filter-label">50만원 미만</label>
+                                    <span class="filter-count">12</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price2" class="filter-checkbox">
+                                    <label for="price2" class="filter-label">50만원-100만원</label>
+                                    <span class="filter-count">25</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price3" class="filter-checkbox" checked>
+                                    <label for="price3" class="filter-label">100만원-150만원</label>
+                                    <span class="filter-count">38</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price4" class="filter-checkbox">
+                                    <label for="price4" class="filter-label">150만원-200만원</label>
+                                    <span class="filter-count">29</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price5" class="filter-checkbox">
+                                    <label for="price5" class="filter-label">200만원 이상</label>
+                                    <span class="filter-count">14</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Brand Filter -->
+                        <div class="filter-group">
+                            <div class="filter-group-title">
+                                <span>브랜드</span>
+                                <span class="filter-toggle"><i class="fas fa-chevron-up"></i></span>
+                            </div>
+                            <div class="filter-options">
+                                <div class="filter-option">
+                                    <input type="checkbox" id="brand1" class="filter-checkbox" checked>
+                                    <label for="brand1" class="filter-label">삼성</label>
+                                    <span class="filter-count">42</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="brand2" class="filter-checkbox">
+                                    <label for="brand2" class="filter-label">LG</label>
+                                    <span class="filter-count">37</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="brand3" class="filter-checkbox">
+                                    <label for="brand3" class="filter-label">애플</label>
+                                    <span class="filter-count">15</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="brand4" class="filter-checkbox">
+                                    <label for="brand4" class="filter-label">ASUS</label>
+                                    <span class="filter-count">23</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="brand5" class="filter-checkbox">
+                                    <label for="brand5" class="filter-label">레노버</label>
+                                    <span class="filter-count">19</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="brand6" class="filter-checkbox">
+                                    <label for="brand6" class="filter-label">MSI</label>
+                                    <span class="filter-count">12</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Rating Filter -->
+                        <div class="filter-group">
+                            <div class="filter-group-title">
+                                <span>평점</span>
+                                <span class="filter-toggle"><i class="fas fa-chevron-up"></i></span>
+                            </div>
+                            <div class="filter-options">
+                                <div class="filter-option">
+                                    <input type="checkbox" id="rating1" class="filter-checkbox" checked>
+                                    <label for="rating1" class="filter-label">
+                                        <span class="rating-stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </span>
+                                        4점 이상
+                                    </label>
+                                    <span class="filter-count">65</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="rating2" class="filter-checkbox">
+                                    <label for="rating2" class="filter-label">
+                                        <span class="rating-stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </span>
+                                        3점 이상
+                                    </label>
+                                    <span class="filter-count">96</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="rating3" class="filter-checkbox">
+                                    <label for="rating3" class="filter-label">
+                                        <span class="rating-stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </span>
+                                        2점 이상
+                                    </label>
+                                    <span class="filter-count">118</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Release Date Filter -->
+                        <div class="filter-group">
+                            <div class="filter-group-title">
+                                <span>출시일</span>
+                                <span class="filter-toggle"><i class="fas fa-chevron-up"></i></span>
+                            </div>
+                            <div class="filter-options">
+                                <div class="filter-option">
+                                    <input type="checkbox" id="date1" class="filter-checkbox">
+                                    <label for="date1" class="filter-label">최근 1개월</label>
+                                    <span class="filter-count">8</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="date2" class="filter-checkbox">
+                                    <label for="date2" class="filter-label">최근 3개월</label>
+                                    <span class="filter-count">23</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="date3" class="filter-checkbox">
+                                    <label for="date3" class="filter-label">최근 6개월</label>
+                                    <span class="filter-count">42</span>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="date4" class="filter-checkbox">
+                                    <label for="date4" class="filter-label">최근 1년</label>
+                                    <span class="filter-count">78</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Results -->
+            <div class="product-results">
+                <div class="results-header">
+                    <div class="results-info">
+                        <span class="results-count">38개</span> 상품 찾음
+                    </div>
+                    <div class="results-actions">
+                        <select class="sort-select">
+                            <option>인기순</option>
+                            <option>최신순</option>
+                            <option>가격 낮은순</option>
+                            <option>가격 높은순</option>
+                            <option>평점순</option>
+                        </select>
+                        <div class="view-toggle">
+                            <button class="view-button active" id="gridView">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-button" id="listView">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Grid -->
+                <div class="product-grid">
+                    <!-- Product 1 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="/api/placeholder/180/120" alt="Product">
+                            <div class="product-badge">인기</div>
+                            <div class="product-stock">재고 5개</div>
+                            <div class="product-quick-actions">
+                                <button class="quick-action-button" title="빠른 보기" onclick="showQuickView()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="quick-action-button" title="비교 추가">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <button class="quick-action-button" title="찜하기">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">삼성전자</div>
+                            <h3 class="product-name">갤럭시북3 Pro 360 NT950QGK</h3>
+                            <div class="product-specs">i7-1360P / 16GB / 512GB / Win11</div>
+                            <div class="product-rating">
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="rating-count">(78)</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">1,359,000원</span>
+                                <span class="original-price">1,699,000원</span>
+                                <span class="discount-percent">20%</span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="action-button cart-button" onclick="showToast()">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    장바구니
+                                </button>
+                                <button class="action-button wishlist-button">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product 2 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="/api/placeholder/180/120" alt="Product">
+                            <div class="product-badge product-new">신상품</div>
+                            <div class="product-quick-actions">
+                                <button class="quick-action-button" title="빠른 보기" onclick="showQuickView()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="quick-action-button" title="비교 추가">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <button class="quick-action-button" title="찜하기">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">삼성전자</div>
+                            <h3 class="product-name">갤럭시북3 Ultra NT960XFG</h3>
+                            <div class="product-specs">i7-13700H / 16GB / 1TB / RTX 4050 / Win11</div>
+                            <div class="product-rating">
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="rating-count">(42)</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">1,499,000원</span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="action-button cart-button" onclick="showToast()">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    장바구니
+                                </button>
+                                <button class="action-button wishlist-button">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product 3 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="/api/placeholder/180/120" alt="Product">
+                            <div class="product-badge product-discount">특가</div>
+                            <div class="product-quick-actions">
+                                <button class="quick-action-button" title="빠른 보기" onclick="showQuickView()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="quick-action-button" title="비교 추가">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <button class="quick-action-button" title="찜하기">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">삼성전자</div>
+                            <h3 class="product-name">갤럭시북3 NT750XFG</h3>
+                            <div class="product-specs">i5-1335U / 16GB / 256GB / Win11</div>
+                            <div class="product-rating">
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="rating-count">(126)</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">1,049,000원</span>
+                                <span class="original-price">1,299,000원</span>
+                                <span class="discount-percent">19%</span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="action-button cart-button" onclick="showToast()">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    장바구니
+                                </button>
+                                <button class="action-button wishlist-button">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product 4 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="/api/placeholder/180/120" alt="Product">
+                            <div class="product-quick-actions">
+                                <button class="quick-action-button" title="빠른 보기" onclick="showQuickView()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="quick-action-button" title="비교 추가">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <button class="quick-action-button" title="찜하기">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">삼성전자</div>
+                            <h3 class="product-name">갤럭시북3 360 NT730QFG</h3>
+                            <div class="product-specs">i5-1340P / 16GB / 512GB / Win11</div>
+                            <div class="product-rating">
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="rating-count">(87)</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">1,199,000원</span>
+                                <span class="original-price">1,399,000원</span>
+                                <span class="discount-percent">14%</span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="action-button cart-button" onclick="showToast()">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    장바구니
+                                </button>
+                                <button class="action-button wishlist-button">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product 5 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="/api/placeholder/180/120" alt="Product">
+                            <div class="product-quick-actions">
+                                <button class="quick-action-button" title="빠른 보기" onclick="showQuickView()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="quick-action-button" title="비교 추가">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <button class="quick-action-button" title="찜하기">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">삼성전자</div>
+                            <h3 class="product-name">갤럭시북3 Pro NT940XFG</h3>
+                            <div class="product-specs">i7-1360P / 16GB / 1TB / Win11</div>
+                            <div class="product-rating">
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="rating-count">(64)</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">1,479,000원</span>
+                                <span class="original-price">1,599,000원</span>
+                                <span class="discount-percent">8%</span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="action-button cart-button" onclick="showToast()">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    장바구니
+                                </button>
+                                <button class="action-button wishlist-button">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product 6 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="/api/placeholder/180/120" alt="Product">
+                            <div class="product-badge">인기</div>
+                            <div class="product-quick-actions">
+                                <button class="quick-action-button" title="빠른 보기" onclick="showQuickView()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="quick-action-button" title="비교 추가">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <button class="quick-action-button" title="찜하기">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">삼성전자</div>
+                            <h3 class="product-name">갤럭시북3 NT750XFT</h3>
+                            <div class="product-specs">i5-1335U / 8GB / 256GB / Win11</div>
+                            <div class="product-rating">
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="rating-count">(103)</span>
+                            </div>
+                            <div class="product-price">
+                                <span class="current-price">999,000원</span>
+                                <span class="original-price">1,190,000원</span>
+                                <span class="discount-percent">16%</span>
+                            </div>
+                            <div class="product-actions">
+                                <button class="action-button cart-button" onclick="showToast()">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    장바구니
+                                </button>
+                                <button class="action-button wishlist-button">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-button" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="page-button active">1</button>
+                    <button class="page-button">2</button>
+                    <button class="page-button">3</button>
+                    <button class="page-button">4</button>
+                    <button class="page-button">5</button>
+                    <button class="page-button">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick View Modal -->
+    <div class="quick-view-modal" id="quickViewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">갤럭시북3 Pro 360 NT950QGK</h2>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Modal content here -->
+                <p>제품 정보가 여기에 표시됩니다.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="action-button wishlist-button">
+                    <i class="far fa-heart"></i>
+                    위시리스트
+                </button>
+                <button class="action-button cart-button" onclick="showToast()">
+                    <i class="fas fa-shopping-cart"></i>
+                    장바구니 추가
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Toast Notification
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Clear Search
+        document.getElementById('searchClear').addEventListener('click', function() {
+            const input = document.querySelector('.search-input');
+            input.value = '';
+            input.classList.remove('with-keyword');
+            document.querySelector('.search-keyword').classList.remove('show');
+        });
+        
+        // Quick View Modal
+        function showQuickView() {
+            document.getElementById('quickViewModal').classList.add('show');
+        }
+        
+        document.getElementById('modalClose').addEventListener('click', function() {
+            document.getElementById('quickViewModal').classList.remove('show');
+        });
+        
+        // Grid/List View Toggle
+        document.getElementById('gridView').addEventListener('click', function() {
+            this.classList.add('active');
+            document.getElementById('listView').classList.remove('active');
+            document.querySelector('.product-results').classList.remove('product-list');
+        });
+        
+        document.getElementById('listView').addEventListener('click', function() {
+            this.classList.add('active');
+            document.getElementById('gridView').classList.remove('active');
+            document.querySelector('.product-results').classList.add('product-list');
+        });
+        
+        // Filter Toggle
+        const filterToggles = document.querySelectorAll('.filter-toggle');
+        filterToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const filterOptions = this.parentNode.nextElementSibling;
+                const icon = this.querySelector('i');
+                
+                if (filterOptions.style.display === 'none') {
+                    filterOptions.style.display = 'block';
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    filterOptions.style.display = 'none';
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+        
+        // Remove Filter Tag
+        const filterTags = document.querySelectorAll('.filter-tag');
+        filterTags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.remove();
+            });
+        });
+        
+        // Format Price Inputs
+        const priceInputs = document.querySelectorAll('.price-input');
+        priceInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value === '') return;
+                
+                let value = this.value.replace(/,/g, '');
+                if (isNaN(value)) {
+                    value = 0;
+                }
+                
+                this.value = parseInt(value).toLocaleString();
+            });
+            
+            input.addEventListener('focus', function() {
+                this.value = this.value.replace(/,/g, '');
+            });
+        });
+        
+        // Price Slider
+        const priceSlider = document.querySelector('.price-slider');
+        priceSlider.addEventListener('input', function() {
+            // Here you would update price ranges based on slider value
+            console.log(this.value);
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('quickViewModal');
+            if (event.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+        // URL에서 검색어 매개변수 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('query');
+        
+        if (query) {
+            // 검색창에 검색어 표시
+            document.querySelector('.search-input').value = query;
+            document.querySelector('.search-keyword').textContent = query;
+            document.querySelector('.search-keyword').classList.add('show');
+            document.querySelector('.search-input').classList.add('with-keyword');
+            
+            // 검색 결과 제목 업데이트
+            const resultSummary = document.querySelector('.results-info');
+            if (resultSummary) {
+                resultSummary.innerHTML = `<span class="results-count">38개</span> '<span style="color: var(--primary);">${query}</span>'에 대한 검색 결과`;
+            }
+            
+            // 브레드크럼 업데이트
+            const breadcrumbSpan = document.querySelector('.breadcrumb span:last-child');
+            if (breadcrumbSpan) {
+                breadcrumbSpan.textContent = query;
+            }
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+/* base.css - 변수 및 기초 스타일 */
+
+:root {
+    /* 색상 시스템 */
+    --primary: #e93170;
+    --primary-dark: #d42665;
+    --primary-light: #ffedf3;
+    --secondary: #f8f9fa;
+    --dark: #343a40;
+    --white: #ffffff;
+    --gray: #e0e0e0;
+    --gray-light: #f8f9fa;
+    --text: #212529;
+    
+    /* 크기 및 간격 시스템 */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 15px;
+    --space-lg: 20px;
+    --space-xl: 30px;
+    --space-xxl: 40px;
+    
+    /* 타이포그래피 */
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 22px;
+    --font-size-xxl: 32px;
+    
+    /* 시각적 효과 */
+    --border-radius: 10px;
+    --border-radius-sm: 4px;
+    --border-radius-lg: 30px;
+    --border-radius-full: 50%;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* 기본 리셋 및 스타일 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+body {
+    color: var(--text);
+    background-color: var(--white);
+    overflow-x: hidden;
+}
+
+/* 기본 링크 스타일 */
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+}
+
+/* 기본 버튼 리셋 */
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* 기본 이미지 스타일 */
+img {
+    max-width: 100%;
+    height: auto;
+}

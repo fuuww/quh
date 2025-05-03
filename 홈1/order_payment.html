@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트픽 - 주문 및 결제</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e93170;
+            --primary-dark: #d42665;
+            --secondary: #f8f9fa;
+            --dark: #343a40;
+            --light: #ffffff;
+            --gray: #e5e5e5;
+            --text: #212529;
+            --border-radius: 10px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        body {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 20px;
+            color: var(--text);
+            background-color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        /* Header styles - Sticky */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray);
+            background-color: var(--light);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+        
+        header.scrolled {
+            box-shadow: var(--shadow);
+            padding: 10px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo-box {
+            background-color: var(--gray);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            margin-right: 10px;
+            font-size: 14px;
+            line-height: 1.2;
+            text-align: center;
+        }
+        
+        /* Search bar with animation */
+        .search-container {
+            flex-grow: 1;
+            max-width: 600px;
+            margin: 0 20px;
+            position: relative;
+        }
+        
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid var(--gray);
+            border-radius: 30px;
+            font-size: 16px;
+            transition: var(--transition);
+            outline: none;
+        }
+        
+        .search-bar:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(233, 49, 112, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--dark);
+            cursor: pointer;
+        }
+        
+        /* Navigation buttons with hover effects */
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-button {
+            background-color: var(--secondary);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-button:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+        }
+        
+        .nav-button i {
+            font-size: 16px;
+        }
+        
+        /* Progress steps */
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 0 15px;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+        
+        .step.active {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        
+        .step-number {
+            background-color: var(--secondary);
+            color: var(--dark);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            margin-right: 8px;
+            transition: var(--transition);
+            border: 2px solid var(--gray);
+        }
+        
+        .step.active .step-number {
+            background-color: var(--primary);
+            color: var(--light);
+            border-color: var(--primary);
+        }
+        
+        .step-name {
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        /* Main content layout */
+        .main-content {
+            display: flex;
+            margin: 30px 0 60px;
+            gap: 30px;
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+        
+        /* Left column for checkout information */
+        .left-column {
+            flex: 1;
+        }
+        
+        /* Right column for order summary */
+        .right-column {
+            width: 350px;
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 992px) {
+            .right-column {
+                width: 100%;
+            }
+        }
+        
+        /* Section styles */
+        .section {
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--gray);
+            transition: var(--transition);
+        }
+        
+        .section:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .section-title:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 5px;
+            height: 20px;
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+        
+        /* Address options */
+        .address-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .address-option {
+            background-color: var(--secondary);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+            text-align: center;
+        }
+        
+        .address-option:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+        }
+        
+        .address-option.active {
+            background-color: var(--primary);
+            color: var(--light);
+        }
+        
+        /* Form styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--gray);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+            outline: none;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(233, 49, 112, 0.2);
+        }
+        
+        /* Address inputs with button */
+        .address-inputs {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 10px;
+            align-items: end;
+        }
+        
+        .address-btn {
+            height: 100%;
+            padding: 12px 15px;
+            background-color: var(--dark);
+            color: var(--light);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+        
+        .address-btn:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        /* Recent addresses dropdown */
+        .recent-addresses {
+            margin-top: 15px;
+        }
+        
+        .recent-address-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .recent-address-list.show {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .recent-address-item {
+            background-color: var(--secondary);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .recent-address-item:hover {
+            background-color: var(--gray);
+            transform: translateX(5px);
+        }
+        
+        /* Product list styles */
+        .product-list {
+            margin-bottom: 15px;
+        }
+        
+        .product-item {
+            display: flex;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray);
+            transition: var(--transition);
+        }
+        
+        .product-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .product-item:last-child {
+            border-bottom: none;
+        }
+        
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+            transition: var(--transition);
+            border: 1px solid var(--gray);
+        }
+        
+        .product-item:hover .product-image {
+            transform: scale(1.05);
+        }
+        
+        .product-details {
+            flex: 1;
+        }
+        
+        .product-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .product-option {
+            font-size: 13px;
+            color: var(--dark);
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+        
+        .product-price-qty {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .qty-btn {
+            width: 25px;
+            height: 25px;
+            border: 1px solid var(--gray);
+            background: var(--secondary);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: var(--transition);
+        }
+        
+        .qty-btn:hover {
+            background-color: var(--primary);
+            color: var(--light);
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        .product-price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .product-total {
+            text-align: right;
+            padding: 15px 0;
+            font-size: 16px;
+            font-weight: bold;
+            border-top: 1px solid var(--gray);
+        }
+        
+        .view-more {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .view-more:hover {
+            background-color: var(--gray);
+            transform: translateY(-2px);
+        }
+        
+        /* Payment methods */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .payment-method {
+            background-color: var(--secondary);
+            padding: 15px 10px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+        
+        .payment-method:hover {
+            background-color: var(--gray);
+            transform: translateY(-5px);
+        }
+        
+        .payment-method.active {
+            background-color: var(--primary);
+            color: var(--light);
+        }
+        
+        .payment-icon {
+            font-size: 24px;
+        }
+        
+        .payment-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .payment-details.show {
+            max-height: 300px;
+            margin-top: 15px;
+        }
+        
+        /* Order summary card */
+        .order-summary {
+            position: sticky;
+            top: 100px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+            padding-top: 15px;
+        }
+        
+        /* Coupon and points section */
+        .coupon-points {
+            margin-top: 20px;
+        }
+        
+        .apply-coupon {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .apply-btn {
+            padding: 12px 20px;
+            background-color: var(--dark);
+            color: var(--light);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        
+        .apply-btn:hover {
+            background-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        /* Checkout button */
+        .checkout-btn {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkout-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(233, 49, 112, 0.3);
+        }
+        
+        /* Security info */
+        .security-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--dark);
+            opacity: 0.7;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--dark);
+            color: var(--light);
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .toast i {
+            font-size: 18px;
+        }
+        
+        /* Loading animation */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(233, 49, 112, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .payment-methods {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-container {
+                margin: 10px 0;
+            }
+            
+            .product-item {
+                flex-direction: column;
+            }
+            
+            .product-image {
+                width: 100%;
+                height: auto;
+                max-height: 150px;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .step-name {
+                display: none;
+            }
+            
+            .step {
+                margin: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">결제가 완료되었습니다.</span>
+    </div>
+    
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Header section - Sticky -->
+    <header id="header">
+        <a href="#" class="logo">
+            <div class="logo-box">스마<br>트픽</div>
+            <span>스마트픽</span>
+        </a>
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="찾으시는 상품을 검색해보세요">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-button">
+                <i class="fas fa-store"></i>
+                쇼핑 계속하기
+            </button>
+            <button class="nav-button">
+                <i class="fas fa-user"></i>
+                로그인
+            </button>
+            <button class="nav-button">
+                <i class="fas fa-shopping-cart"></i>
+                장바구니
+            </button>
+        </div>
+    </header>
+    
+    <!-- Progress steps -->
+    <div class="progress-steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-name">장바구니</div>
+        </div>
+        <div class="step active">
+            <div class="step-number">2</div>
+            <div class="step-name">주문/결제</div>
+        </div>
+        <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-name">주문완료</div>
+        </div>
+    </div>
+    
+    <!-- Main content section -->
+    <div class="main-content">
+        <!-- Left column: Delivery, Products, Payment -->
+        <div class="left-column">
+            <!-- Delivery address section -->
+            <div class="section">
+                <h2 class="section-title">배송주소</h2>
+                
+                <div class="address-options">
+                    <div class="address-option active">기본 배송지</div>
+                    <div class="address-option">새 배송지</div>
+                    <div class="address-option">최근 배송지</div>
+                </div>
+                
+                <div class="address-form">
+                    <div class="form-group">
+                        <label class="form-label">받는 사람</label>
+                        <input type="text" class="form-control" placeholder="이름을 입력하세요" value="홍길동">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">연락처</label>
+                        <input type="text" class="form-control" placeholder="휴대폰 번호 (-없이 입력)" value="01012345678">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">주소</label>
+                        <div class="address-inputs">
+                            <input type="text" class="form-control" placeholder="우편번호" value="12345" disabled>
+                            <button class="address-btn">
+                                <i class="fas fa-search"></i> 주소 검색
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="기본 주소" value="서울시 강남구 테헤란로 123" disabled>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="상세 주소" value="456동 789호">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">배송 메모</label>
+                        <select class="form-control">
+                            <option>배송 메모를 선택해주세요</option>
+                            <option selected>부재시 경비실에 맡겨주세요</option>
+                            <option>문 앞에 놓아주세요</option>
+                            <option>배송 전 연락 바랍니다</option>
+                            <option>직접 입력</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="recent-addresses">
+                    <div class="recent-address-list">
+                        <div class="recent-address-item">
+                            <div><strong>회사</strong> (홍길동)</div>
+                            <div>서울시 서초구 서초대로 123, 4층</div>
+                        </div>
+                        <div class="recent-address-item">
+                            <div><strong>부모님</strong> (김부모)</div>
+                            <div>경기도 성남시 분당구 판교로 123</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order products section -->
+            <div class="section">
+                <h2 class="section-title">주문 상품</h2>
+                
+                <div class="product-list">
+                    <div class="product-item">
+                        <img src="/api/placeholder/80/80" class="product-image" alt="상품 이미지">
+                        <div class="product-details">
+                            <div class="product-name">삼성 갤럭시북 Pro 360</div>
+                            <div class="product-option">옵션: 미스틱 실버 / 16GB / 512GB</div>
+                            <div class="product-price-qty">
+                                <div class="quantity-controls">
+                                    <button class="qty-btn">-</button>
+                                    <span>1</span>
+                                    <button class="qty-btn">+</button>
+                                </div>
+                                <div class="product-price">1,450,000원</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-item">
+                        <img src="/api/placeholder/80/80" class="product-image" alt="상품 이미지">
+                        <div class="product-details">
+                            <div class="product-name">삼성 갤럭시 버즈 프로</div>
+                            <div class="product-option">옵션: 팬텀 블랙</div>
+                            <div class="product-price-qty">
+                                <div class="quantity-controls">
+                                    <button class="qty-btn">-</button>
+                                    <span>1</span>
+                                    <button class="qty-btn">+</button>
+                                </div>
+                                <div class="product-price">199,000원</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="view-more">
+                    더보기 (1개) <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            
+            <!-- Payment method section -->
+            <div class="section">
+                <h2 class="section-title">결제 수단</h2>
+                
+                <div class="payment-methods">
+                    <div class="payment-method active">
+                        <div class="payment-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div>신용카드</div>
+                    </div>
+                    <div class="payment-method">
+                        <div class="payment-icon">
+                            <i class="fas fa-money-check"></i>
+                        </div>
+                        <div>계좌이체</div>
+                    </div>
+                    <div class="payment-method">
+                        <div class="payment-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div>간편결제</div>
+                    </div>
+                    <div class="payment-method">
+                        <div class="payment-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div>무통장입금</div>
+                    </div>
+                    <div class="payment-method">
+                        <div class="payment-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>휴대폰결제</div>
+                    </div>
+                </div>
+                
+                <div class="payment-details show">
+                    <div class="form-group">
+                        <label class="form-label">카드사 선택</label>
+                        <select class="form-control">
+                            <option>카드사를 선택해주세요</option>
+                            <option selected>신한카드</option>
+                            <option>삼성카드</option>
+                            <option>현대카드</option>
+                            <option>KB국민카드</option>
+                            <option>롯데카드</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">할부 개월</label>
+                        <select class="form-control">
+                            <option selected>일시불</option>
+                            <option>2개월</option>
+                            <option>3개월</option>
+                            <option>6개월</option>
+                            <option>12개월</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right column: Order summary -->
+        <div class="right-column">
+            <div class="section order-summary">
+                <h2 class="section-title">주문 요약</h2>
+                
+                <div class="summary-rows">
+                    <div class="summary-row">
+                        <span>상품 금액</span>
+                        <span>1,649,000원</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>배송비</span>
+                        <span>무료</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>할인 금액</span>
+                        <span>-50,000원</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>총 결제 금액</span>
+                        <span>1,599,000원</span>
+                    </div>
+                </div>
+                
+                <div class="coupon-points">
+                    <div class="form-group">
+                        <label class="form-label">쿠폰 적용</label>
+                        <div class="apply-coupon">
+                            <select class="form-control">
+                                <option>쿠폰을 선택해주세요</option>
+                                <option selected>신규 가입 50,000원 할인</option>
+                                <option>생일 축하 10% 할인</option>
+                            </select>
+                            <button class="apply-btn">적용</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">적립금 사용</label>
+                        <div class="apply-coupon">
+                            <input type="text" class="form-control" placeholder="0" value="0">
+                            <button class="apply-btn">적용</button>
+                        </div>
+                        <div style="font-size: 12px; color: var(--dark); opacity: 0.7; margin-top: 5px;">
+                            사용 가능 적립금: 5,000원
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="checkout-btn" id="checkoutBtn">
+                    <i class="fas fa-lock"></i> 1,599,000원 결제하기
+                </button>
+                
+                <div class="security-info">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>안전한 결제를 위해 SSL 보안 인증을 사용합니다</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sticky header
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // Address option selection
+        const addressOptions = document.querySelectorAll('.address-option');
+        addressOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                addressOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show recent addresses list if that option is selected
+                const recentList = document.querySelector('.recent-address-list');
+                if (this.textContent === '최근 배송지') {
+                    recentList.classList.add('show');
+                } else {
+                    recentList.classList.remove('show');
+                }
+            });
+        });
+        
+        // Payment method selection
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', function() {
+                paymentMethods.forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show payment details
+                const paymentDetails = document.querySelector('.payment-details');
+                paymentDetails.classList.add('show');
+            });
+        });
+        
+        // Recent address item click event
+        const recentAddressItems = document.querySelectorAll('.recent-address-item');
+        recentAddressItems.forEach(item => {
+            item.addEventListener('click', function() {
+                showToast('선택한 배송지로 정보가 업데이트되었습니다.');
+            });
+        });
+        
+        // Checkout button click
+        document.getElementById('checkoutBtn').addEventListener('click', function() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('show');
+            
+            // Simulate payment processing (2 seconds)
+            setTimeout(function() {
+                loadingOverlay.classList.remove('show');
+                showToast('결제가 완료되었습니다!');
+                
+                // Redirect to order complete page after toast message
+                setTimeout(function() {
+                    // In a real application, redirect to order complete page
+                    // window.location.href = 'order-complete.html';
+                    alert('주문이 완료되었습니다. 감사합니다!');
+                }, 2000);
+            }, 2000);
+        });
+        
+        // Toast notification function
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // View more button for product list
+        const viewMoreBtn = document.querySelector('.view-more');
+        viewMoreBtn.addEventListener('click', function() {
+            // In a real application, show more products or expand the list
+            showToast('모든 상품이 표시되었습니다.');
+        });
+
+        // 주문결제 페이지에서 장바구니 정보 불러오기
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutItems = JSON.parse(localStorage.getItem('checkoutItems')) || [];
+            
+            // 가져온
+            // 가져온 장바구니 정보를 사용하여 주문 상품 섹션 채우기
+            if (checkoutItems.length > 0) {
+                // 상품 목록을 채우는 로직 구현
+                displayCheckoutItems(checkoutItems);
+            }
+        });
+
+        function displayCheckoutItems(items) {
+            // 상품 목록을 표시하는 로직
+            const productList = document.querySelector('.product-list');
+            productList.innerHTML = ''; // 기존 내용 비우기
+            
+            items.forEach(item => {
+                // 각 상품 아이템 추가
+                const productItem = document.createElement('div');
+                productItem.className = 'product-item';
+                // 아이템 내용 채우기
+                productItem.innerHTML = `
+                    <img src="${item.image}" class="product-image" alt="${item.name}">
+                    <div class="product-details">
+                        <div class="product-name">${item.name}</div>
+                        <div class="product-option">옵션: ${item.option}</div>
+                        <div class="product-price-qty">
+                            <div class="quantity-controls">
+                                <button class="qty-btn">-</button>
+                                <span>${item.quantity}</span>
+                                <button class="qty-btn">+</button>
+                            </div>
+                            <div class="product-price">${item.price.toLocaleString()}원</div>
+                        </div>
+                    </div>
+                `;
+                productList.appendChild(productItem);
+            });
+            
+            // 주문 요약 정보 업데이트
+            updateOrderSummary(items);
+        }
+
+        function updateOrderSummary(items) {
+            // 주문 요약 정보 계산 및 업데이트
+            const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+            document.querySelector('.checkout-btn').innerHTML = `
+                <i class="fas fa-lock"></i> ${totalPrice.toLocaleString()}원 결제하기
+            `;
+            
+            // 각 요약 항목 업데이트
+            // ...
+        }
+    </script>
+</body>
+</html>
